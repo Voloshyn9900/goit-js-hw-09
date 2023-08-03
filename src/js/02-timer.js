@@ -5,10 +5,9 @@ import 'flatpickr/dist/flatpickr.min.css';
 
 import Notiflix from 'notiflix';
 
-
 const selector = document.querySelector(`input[type="text"]`);
 const startBtn = document.querySelector('[data-start]');
-
+startBtn.disabled = true;
 
 const refsData = {
   days: document.querySelector(`[data-days]`),
@@ -17,20 +16,11 @@ const refsData = {
   seconds: document.querySelector(`[data-seconds]`),
 };
 
-
 let currentDate = null;
 let selectedDate = null;
-
 let disabledBtn = true;
 
-let unixDifferenceTime = null;
-let objCalculatedDataTime = null;
-
 let intervalID = null;
-
-const defaultMarkup = "00";
-
-startBtn.disabled = disabledBtn;
 
 const options = {
   enableTime: true,
@@ -38,21 +28,15 @@ const options = {
   defaultDate: new Date(),
   minuteIncrement: 1,
   onClose(selectedDates) {
-    currentDate = new Date();
     selectedDate = selectedDates[0];
-
-    checkValidityTime(currentDate, selectedDate);
-    unixDifferenceTime = counterDifferenceTime(selectedDate);
-    objCalculatedDataTime = convertMs(unixDifferenceTime);
-    // GetMarkupTimer(objCalculatedDataTime);
+    checkValidityTime(options.defaultDate, selectedDate);
   },
 };
 
+flatpickr(selector, options);
 
-flatpickr(selector, options)
-
-function checkValidityTime(currentDate, selectedDate) {
-  if (currentDate < selectedDate) {
+function checkValidityTime(defaultDate, selectedDate) {
+  if (defaultDate < selectedDate) {
     Notiflix.Notify.success('Congratulations! Click "Start" to begin');
     startBtn.disabled = !disabledBtn;
   } else {
@@ -61,48 +45,51 @@ function checkValidityTime(currentDate, selectedDate) {
   }
 }
 
-function counterDifferenceTime(selectedDate) {
-  // let differenceTime = null;
-  return intervalID = setInterval(() => {
-    let differenceTime = selectedDate - new Date();
-    // console.log(differenceTime);
-    return differenceTime;
-  }, 1000);
+startBtn.addEventListener('click', startTimer);
 
+function startTimer(params) {
+  startBtn.disabled = true;
+  selector.disabled = true;
+  intervalID = setInterval(() => {
+    currentDate = new Date();
+    const objStepData = convertMs(selectedDate - currentDate);
+    getMarckupData(objStepData, currentDate);
+
+    if (currentDate >= selectedDate) {
+      clearInterval(intervalID);
+      intervalID = null;
+      startBtn.disabled = false;
+      selector.disabled = false;
+      Notiflix.Notify.warning('Yoohoo, it\'\s time');
+    }
+  }, 1000);
 }
 
+function getMarckupData(objStepData, currentDate) {
+  const { days, hours, minutes, seconds } = objStepData;
+
+  if (currentDate < selectedDate) {
+    console.log(currentDate.getTime(), selectedDate.getTime());
+    refsData.days.textContent = addLeadingZero(days);
+    refsData.hours.textContent = addLeadingZero(hours);
+    refsData.minutes.textContent = addLeadingZero(minutes);
+    refsData.seconds.textContent = addLeadingZero(seconds);
+  }
+}
 
 function convertMs(ms) {
   const second = 1000;
   const minute = second * 60;
   const hour = minute * 60;
   const day = hour * 24;
-
   const days = Math.floor(ms / day);
   const hours = Math.floor((ms % day) / hour);
   const minutes = Math.floor(((ms % day) % hour) / minute);
   const seconds = Math.floor((((ms % day) % hour) % minute) / second);
-
+  console.log({ days, hours, minutes, seconds });
   return { days, hours, minutes, seconds };
 }
 
 function addLeadingZero(item) {
   return item.toString().padStart(2, '0');
 }
-
-function GetMarkupTimer(objCalculatedDataTime) {
-  const { days, hours, minutes, seconds } = objCalculatedDataTime;
-  
-  if (counterDifferenceTime(currentDate, selectedDate) > 0) {
-    refsData.days.textContent = addLeadingZero(days);
-    refsData.hours.textContent = addLeadingZero(hours);
-    refsData.minutes.textContent = addLeadingZero(minutes);
-    refsData.seconds.textContent = addLeadingZero(seconds);
-  } else {
-    refsData.days.textContent = defaultMarkup;
-    refsData.hours.textContent = defaultMarkup;
-    refsData.minutes.textContent = defaultMarkup;
-    refsData.seconds.textContent = defaultMarkup;
-  }
-
-};
