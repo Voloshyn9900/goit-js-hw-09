@@ -14,13 +14,14 @@ function handleSubmit(e) {
   const amount = parseInt(e.currentTarget.amount.value);
 
   for (position; position <= amount; position++) {
-    createPromise(position);
-    
-
-
+    // console.log(createPromise(position, delay));
+    createPromise(position, delay + position * step)
+      .then(({ position, delay }) => {
+        Notiflix.Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`);
+      }).catch(({ position, delay }) => {
+        Notiflix.Notify.failure(`❌ Rejected promise ${position} in ${delay}ms`);
+      }); 
   }
-
-
 }
 
 
@@ -31,12 +32,12 @@ function createPromise(position, delay) {
     
     setTimeout(() => {
       if (shouldResolve) {
-        resolve(console.log(`// Fulfill`));
+        resolve({ position, delay });
+        console.log({ position, delay });
       } else {
-        reject(console.log(`// Reject`));
+        reject({ position, delay });
+        console.log({ position, delay });
       }
-    }, timeout);
-
+    }, delay);
   })
-
 }
