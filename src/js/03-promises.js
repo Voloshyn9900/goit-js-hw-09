@@ -15,12 +15,18 @@ function handleSubmit(e) {
 
   for (position; position <= amount; position++) {
     // console.log(createPromise(position, delay));
-    createPromise(position, delay + position * step)
+    createPromise(position, delay)
       .then(({ position, delay }) => {
-        Notiflix.Notify.success(`✅ Fulfilled promise ${position} in ${delay}ms`);
-      }).catch(({ position, delay }) => {
-        Notiflix.Notify.failure(`❌ Rejected promise ${position} in ${delay}ms`);
+        Notiflix.Notify.success(
+          `✅ Fulfilled promise ${position} in ${delay}ms`
+        );
+      })
+      .catch(({ position, delay }) => {
+        Notiflix.Notify.failure(
+          `❌ Rejected promise ${position} in ${delay}ms`
+        );
       }); 
+    delay += step;
   }
 }
 
